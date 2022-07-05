@@ -136,7 +136,7 @@ class ManualLinearRegression(nn.Module):
 
 # create the model and sent to device
 model = ManualLinearRegression().to(device)
-
+optimizer = optim.SGD(model.parameters(), lr=lr)
 for epoch in range(n_epochs):
     # yhat = a + b * x_train_tensor
     model.train()
@@ -158,7 +158,7 @@ for epoch in range(n_epochs):
     # b.grad.zero_()
     optimizer.zero_grad()
 
-print(a, b)
+print(model.state_dict())
 
 """
 PyTorch Training #5:
@@ -174,7 +174,7 @@ class LayerLinearRegression(nn.Module):
         return self.linear(x)
 
 model = LayerLinearRegression().to(device)
-
+optimizer = optim.SGD(model.parameters(), lr=lr)
 for epoch in range(n_epochs):
     model.train()
     yhat = model(x_train_tensor)
@@ -183,7 +183,7 @@ for epoch in range(n_epochs):
     optimizer.step()
     optimizer.zero_grad()
 
-print(a, b)
+print(model.state_dict())
 
 """
 PyTorch Training #6:
@@ -198,7 +198,6 @@ def make_train_step(model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        print(loss)
         return loss.item()
     return train_step
 
@@ -209,5 +208,5 @@ losses =[]
 for epoch in range(n_epochs):
     loss = train_step(x_train_tensor,y_train_tensor)
     losses.append(loss)
-print(a, b)
+print(model.state_dict())
 
