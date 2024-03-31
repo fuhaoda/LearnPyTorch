@@ -430,7 +430,7 @@ class ModelTrainer(object):
             # or something else (logits), which we need to convert
             # using a sigmoid
             else:
-                predicted = (torch.sigmoid(yhat) > threshold).long()
+                predicted = (yhat > threshold).long()
 
         # How many samples got classified correctly for each class
         result = []
