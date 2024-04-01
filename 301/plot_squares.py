@@ -104,14 +104,14 @@ def counter_vs_clock(basic_corners=None, basic_colors=None, basic_letters=None, 
     
     return fig
 
-def sequence_pred(sbs_obj, X, directions=None, n_rows=2, n_cols=5):
+def sequence_pred(trainer_obj, X, directions=None, n_rows=2, n_cols=5):
     fig, axs = plt.subplots(n_rows, n_cols, figsize=(4*n_cols, 4*n_rows))
     axs = axs.flatten()
 
     for e, ax in enumerate(axs):
         first_corners = X[e, :2, :]
-        sbs_obj.model.eval()
-        next_corners = sbs_obj.model(X[e:e+1, :2].to(sbs_obj.device)).squeeze().detach().cpu().numpy()
+        trainer_obj.model.eval()
+        next_corners = trainer_obj.model(X[e:e+1, :2].to(trainer_obj.device)).squeeze().detach().cpu().numpy()
         pred_corners = np.concatenate([first_corners, next_corners], axis=0)
 
         for j, corners in enumerate([X[e], pred_corners]):

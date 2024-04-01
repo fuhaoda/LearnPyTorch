@@ -12,12 +12,13 @@ class Encoder(nn.Module):
         self.hidden_dim = hidden_dim
         self.n_features = n_features
         self.hidden = None
-        self.basic_rnn = nn.GRU(self.n_features, self.hidden_dim, batch_first=True)               
+        self.basic_rnn = nn.GRU(self.n_features, self.hidden_dim, batch_first=True)
+
     def forward(self, X):        
         rnn_out, self.hidden = self.basic_rnn(X)
         return rnn_out # N, L, F
     
-class Decoder(nn.Module):
+""" class Decoder(nn.Module):
     def __init__(self, n_features, hidden_dim):
         super().__init__()
         self.hidden_dim = hidden_dim
@@ -40,7 +41,25 @@ class Decoder(nn.Module):
         out = self.regression(last_output)
         
         # N, 1, F
-        return out.view(-1, 1, self.n_features)  
+        return out.view(-1, 1, self.n_features)  """ 
+
+class Decoder(nn.Module):
+    def __init__(self, n_features, hidden_dim):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+        self.n_features = n_features
+        self.hidden = None
+        self.basic_rnn = nn.GRU(self.n_features, self.hidden_dim, batch_first=True) 
+        self.regression = nn.Linear(self.hidden_dim, self.n_features)
+        
+    def init_hidden(self, hidden_seq):
+        self.hidden = hidden_seq[:, -1:].permute(1, 0, 2) # N, 1, H
+                   
+        
+    def forward(self, X):
+        batch_first_output, self.hidden = self.basic_rnn(X, self.hidden) 
+        last_output = batch_first_output[:, -1]
+        return self.regression(last_output).view(-1, 1, self.n_features)  
     
 
 class EncoderDecoder(nn.Module):
@@ -71,28 +90,23 @@ class EncoderDecoder(nn.Module):
         source_seq = X[:, :self.input_len, :]
         target_seq = X[:, self.input_len:, :]
         self.init_outputs(X.shape[0])        
-        
         # Encoder expected N, L, F
         hidden_seq = self.encoder(source_seq)
         # Output is N, L, H
         self.decoder.init_hidden(hidden_seq)
-        
         # The last input of the encoder is also
         # the first input of the decoder
         dec_inputs = source_seq[:, -1:, :]
-        
         # Generates as many outputs as the target length
         for i in range(self.target_len):
             # Output of decoder is N, 1, F
             out = self.decoder(dec_inputs)
             self.store_output(i, out)
-            
             prob = self.teacher_forcing_prob
             # In evaluation/test the target sequence is
             # unknown, so we cannot use teacher forcing
             if not self.training:
                 prob = 0
-                
             # If it is teacher forcing
             if torch.rand(1) <= prob:
                 # Takes the actual element
@@ -100,7 +114,6 @@ class EncoderDecoder(nn.Module):
             else:
                 # Otherwise uses the last predicted output
                 dec_inputs = out
-            
         return self.outputs
 
 # Setup the model
