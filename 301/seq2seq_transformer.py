@@ -98,7 +98,7 @@ for p in model.parameters():
         nn.init.xavier_uniform_(p)
 
 # Training Data
-points, directions = generate_sequences(n=256)
+points, directions = generate_sequences(n=512)
 full_train = torch.as_tensor(points).float()
 target_train = full_train[:, 2:]
 
@@ -116,10 +116,10 @@ train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
 test_loader = DataLoader(test_data, batch_size=16)
 
 # Train the model
-seq2seq_simple = ModelTrainer(model, loss, optimizer)
-seq2seq_simple.set_loaders(train_loader, test_loader)
-seq2seq_simple.train(100)
+seq2seq_transformer = ModelTrainer(model, loss, optimizer)
+seq2seq_transformer.set_loaders(train_loader, test_loader)
+seq2seq_transformer.train(100)
 
-seq2seq_simple.plot_losses()
+seq2seq_transformer.plot_losses()
 
-sequence_pred(seq2seq_simple, full_test, test_directions)
+sequence_pred(seq2seq_transformer, full_test, test_directions)
